@@ -362,19 +362,19 @@ document.addEventListener("DOMContentLoaded", () => {
         });
 
         const showModel = (item) => {
-    // Show the loading indicator when starting to load the model
-    showLoading();
-
+    // Show the loading indicator (should already be visible)
+    // We don't call showLoading() here since it's already done
+    
     // If there's a preview item, remove it first
     if (previewItem) {
         scene.remove(previewItem);
     }
 
-    // Select the model (or do any other necessary processing)
+    // Select the model
     selectModel(item);
     console.log("showModel() called. Selected models:", selectedModels);
 
-    // Now, load and add the model
+    // Now, add the model to the scene
     previewItem = item;
     scene.add(previewItem);
 
@@ -382,18 +382,21 @@ document.addEventListener("DOMContentLoaded", () => {
     if (scene.children.includes(previewItem)) {
         console.log('Model successfully added to the scene');
         
-        // Optionally, set the opacity of the model to make it appear more subtle if needed
+        // Optionally, set the opacity
         setOpacityForSelected(0.5);
 
-        // Show confirmation buttons after model has been added
+        // Show confirmation buttons
         confirmButtons.style.display = "flex";
         isModelSelected = true;
 
-        // Hide the loading indicator when the model is fully loaded and displayed
+        // Hide the loading indicator only when model is fully ready
         hideLoading();
     } else {
         console.log('Failed to add model to scene');
+        hideLoading();
     }
+    
+    return true; // Signal that the model was added successfully
 };
 
 
