@@ -361,20 +361,17 @@ document.addEventListener("DOMContentLoaded", () => {
             });
         });
 
-        const showModel = (item) => {
-    // Show the loading indicator (should already be visible)
-    // We don't call showLoading() here since it's already done
-    
+        const showModel = (item, callback) => {
     // If there's a preview item, remove it first
     if (previewItem) {
         scene.remove(previewItem);
     }
 
-    // Select the model
+    // Select the model (or do any other necessary processing)
     selectModel(item);
     console.log("showModel() called. Selected models:", selectedModels);
 
-    // Now, add the model to the scene
+    // Now, load and add the model
     previewItem = item;
     scene.add(previewItem);
 
@@ -382,23 +379,36 @@ document.addEventListener("DOMContentLoaded", () => {
     if (scene.children.includes(previewItem)) {
         console.log('Model successfully added to the scene');
         
-        // Optionally, set the opacity
+        // Optionally, set the opacity of the model
         setOpacityForSelected(0.5);
 
-        // Show confirmation buttons
+        // Show confirmation buttons after model has been added
         confirmButtons.style.display = "flex";
         isModelSelected = true;
 
-        // Hide the loading indicator only when model is fully ready
-        hideLoading();
+        // If we have texture loading or other async processes,
+        // we would wait for them here before calling the callback
+        
+        // For THREE.js models with textures, we might do something like:
+        if (previewItem.userData.loadingTextures) {
+            // If we have a way to track texture loading
+            const checkTexturesLoaded = () => {
+                if (previewItem.userData.texturesLoaded) {
+                    if (callback) callback();
+                } else {
+                    setTimeout(checkTexturesLoaded, 100);
+                }
+            };
+            checkTexturesLoaded();
+        } else {
+            // If no special loading needed, just call the callback
+            if (callback) callback();
+        }
     } else {
         console.log('Failed to add model to scene');
-        hideLoading();
+        if (callback) callback(); // Still call callback even on failure
     }
-    
-    return true; // Signal that the model was added successfully
 };
-
 
         const deleteModel = () => {
             if (selectedObject) {
@@ -491,31 +501,48 @@ document.addEventListener("DOMContentLoaded", () => {
                     const thumbnail = document.querySelector(`#${category}-${itemName}`);
                     if (thumbnail) {
                         thumbnail.addEventListener("click", async (e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            
-                            // Show loading indicator
-                            showLoading();
-                            
-                            // Get the model and create a clone
-                            const model = loadedModels.get(`${category}-${itemName}`);
-                            if (model) {
-                                // Simulate loading progress
-                                let progress = 0;
-                                const loadingInterval = setInterval(() => {
-                                    progress += 5;
-                                    updateLoadingProgress(progress);
-                                    
-                                    if (progress >= 100) {
-                                        clearInterval(loadingInterval);
-                                        
-                                        // Small delay at 100% for visibility
-                                        setTimeout(() => {
-                                            const modelClone = model.clone(true);
-                                            showModel(modelClone);
-                                        }, 200);
-                                    }
-                                }, 40);
+    e.preventDefault();
+    e.stopPropagation();
+    
+    // Show loading indicator
+    showLoading();
+    updateLoadingProgress(0);
+    
+    // Get the model
+    const model = loadedModels.get(${category}-${itemName});
+    if (!model) {
+        hideLoading();
+        console.error(Model not found: ${category}-${itemName});
+        return;
+    }
+    
+    // Create clone of the model
+    const modelClone = model.clone(true);
+    
+    // Start with progress at 10% to show activity
+    updateLoadingProgress(10);
+    
+    // Start the loading animation - this will go to 90% max
+    let progress = 10;
+    const loadingInterval = setInterval(() => {
+        // Increase progress, but cap at 90% until model is actually ready
+        progress += 2;
+        if (progress > 90) progress = 90;
+        updateLoadingProgress(progress);
+    }, 50);
+    
+    // Call showModel with a callback to know when it's complete
+    showModel(modelClone, () => {
+        // Clear the loading interval when model is fully loaded
+        clearInterval(loadingInterval);
+        // Set progress to 100%
+        updateLoadingProgress(100);
+        // Short delay at 100% for visibility
+        setTimeout(() => {
+            hideLoading();
+        }, 200);
+    });
+});
                             } else {
                                 // Hide loading if model not found
                                 hideLoading();
