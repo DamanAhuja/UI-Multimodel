@@ -490,71 +490,65 @@ document.addEventListener("DOMContentLoaded", () => {
 
         // Modified model loading code with loading indicator
         for (const category of ['table', 'chair', 'sofa', 'vase', 'rug']) {
-            for (let i = 1; i <= 5; i++) {
-                const itemName = `${category}${i}`;
-                try {
-                    const model = await loadGLTF(`../assets/models/${category}/${itemName}/scene.gltf`);
-                    normalizeModel(model.scene, 0.5);
-                    const item = new THREE.Group();
-                    item.add(model.scene);
-                    loadedModels.set(`${category}-${itemName}`, item);
-                    const thumbnail = document.querySelector(`#${category}-${itemName}`);
-                    if (thumbnail) {
-                        thumbnail.addEventListener("click", async (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    
-    // Show loading indicator
-    showLoading();
-    updateLoadingProgress(0);
-    
-    // Get the model
-    const model = loadedModels.get(${category}-${itemName});
-    if (!model) {
-        hideLoading();
-        console.error(Model not found: ${category}-${itemName});
-        return;
-    }
-    
-    // Create clone of the model
-    const modelClone = model.clone(true);
-    
-    // Start with progress at 10% to show activity
-    updateLoadingProgress(10);
-    
-    // Start the loading animation - this will go to 90% max
-    let progress = 10;
-    const loadingInterval = setInterval(() => {
-        // Increase progress, but cap at 90% until model is actually ready
-        progress += 2;
-        if (progress > 90) progress = 90;
-        updateLoadingProgress(progress);
-    }, 50);
-    
-    // Call showModel with a callback to know when it's complete
-    showModel(modelClone, () => {
-        // Clear the loading interval when model is fully loaded
-        clearInterval(loadingInterval);
-        // Set progress to 100%
-        updateLoadingProgress(100);
-        // Short delay at 100% for visibility
-        setTimeout(() => {
-            hideLoading();
-        }, 200);
-    });
-});
-                            } else {
-                                // Hide loading if model not found
-                                hideLoading();
-                                console.error(`Model not found: ${category}-${itemName}`);
-                            }
-                        });
+    for (let i = 1; i <= 5; i++) {
+        const itemName = ${category}${i};
+        try {
+            const model = await loadGLTF(../assets/models/${category}/${itemName}/scene.gltf);
+            normalizeModel(model.scene, 0.5);
+            const item = new THREE.Group();
+            item.add(model.scene);
+            loadedModels.set(${category}-${itemName}, item);
+            const thumbnail = document.querySelector(#${category}-${itemName});
+            if (thumbnail) {
+                thumbnail.addEventListener("click", async (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    // Show loading indicator
+                    showLoading();
+                    updateLoadingProgress(0);
+                    
+                    // Get the model
+                    const model = loadedModels.get(${category}-${itemName});
+                    if (!model) {
+                        hideLoading();
+                        console.error(Model not found: ${category}-${itemName});
+                        return;
                     }
-                } catch (error) {
-                    console.error(`Error loading model ${category}/${itemName}:`, error);
-                }
+                    
+                    // Create clone of the model
+                    const modelClone = model.clone(true);
+                    
+                    // Start with progress at 10% to show activity
+                    updateLoadingProgress(10);
+                    
+                    // Start the loading animation - this will go to 90% max
+                    let progress = 10;
+                    const loadingInterval = setInterval(() => {
+                        // Increase progress, but cap at 90% until model is actually ready
+                        progress += 2;
+                        if (progress > 90) progress = 90;
+                        updateLoadingProgress(progress);
+                    }, 50);
+                    
+                    // Call showModel with a callback to know when it's complete
+                    showModel(modelClone, () => {
+                        // Clear the loading interval when model is fully loaded
+                        clearInterval(loadingInterval);
+                        // Set progress to 100%
+                        updateLoadingProgress(100);
+                        // Short delay at 100% for visibility
+                        setTimeout(() => {
+                            hideLoading();
+                        }, 200);
+                    });
+                });
             }
+        } catch (error) {
+            console.error(Error loading model ${category}/${itemName}:, error);
         }
+    }
+}
 
         renderer.setAnimationLoop((timestamp, frame) => {
             if (frame) {
